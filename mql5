@@ -1,0 +1,92 @@
+
+//+------------------------------------------------------------------+
+//|                                                Secure Set.mq5    |
+//|                                Copyright © 2021 Forex Robot Easy Team |
+//|                                              https://forexroboteasy.com |
+//+------------------------------------------------------------------+
+
+//--- Expert initialization function
+int OnInit()
+{
+   //--- Set optimization parameters for high volatility
+   SetOptimizationParameter(OPTIMIZATION_CRITERION, CRITERION_MAX_PROFIT);
+   SetOptimizationParameter(OPTIMIZATION_DIRECTION, OPTIMIZATION_DIRECTION_FORWARD);
+   SetOptimizationParameter(OPTIMIZATION_STEPS, 1000);
+
+   //--- Set currency pair handling
+   int currencyPair = SYMBOL_EURUSD; // Example currency pair
+   SetSymbolStopLevel(currencyPair, 10); // Set stop level for the currency pair
+
+   //--- Set trend trading strategy using pending orders
+   double buyPrice = MarketInfo(Symbol(), MODE_ASK) + 10 * SymbolInfoDouble(Symbol(), SYMBOL_POINT);
+   double sellPrice = MarketInfo(Symbol(), MODE_BID) - 10 * SymbolInfoDouble(Symbol(), SYMBOL_POINT);
+   int buyOrder = OrderSend(Symbol(), OP_BUYSTOP, 0.1, buyPrice, 10, 0, 0, 'Buy Pending Order', 0, 0, clrGreen);
+   int sellOrder = OrderSend(Symbol(), OP_SELLSTOP, 0.1, sellPrice, 10, 0, 0, 'Sell Pending Order', 0, 0, clrRed);
+
+   //--- Set basic Trailing Stop orders
+   double trailingStop = 10 * SymbolInfoDouble(Symbol(), SYMBOL_POINT);
+   for (int i = OrdersTotal() - 1; i >= 0; i--)
+   {
+      if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+      {
+         if (OrderType() == OP_BUY)
+            OrderModify(OrderTicket(), OrderOpenPrice(), 0, OrderOpenPrice() - trailingStop, 0, Green);
+         else if (OrderType() == OP_SELL)
+            OrderModify(OrderTicket(), OrderOpenPrice(), 0, OrderOpenPrice() + trailingStop, 0, Red);
+      }
+   }
+
+   //--- Set trailing stops for real orders and pending orders
+   for (int i = OrdersTotal() - 1; i >= 0; i--)
+   {
+      if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+      {
+         if (OrderType() == OP_BUY || OrderType() == OP_SELL)
+            OrderSelect(OrderTicket(), SELECT_BY_TICKET);
+         if (OrderType() == OP_BUY || OrderType() == OP_SELL)
+            OrderModify(OrderTicket(), OrderOpenPrice(), 0, OrderOpenPrice() - trailingStop, 0, Green);
+      }
+   }
+
+   //--- Set flexible Forex strategies
+   int strategy = 1; // Example strategy
+   switch (strategy)
+   {
+      case 1:
+         // Implement strategy 1
+         break;
+      case 2:
+         // Implement strategy 2
+         break;
+      // Add more strategies as needed
+   }
+
+   //--- Add necessary trading functions
+   // Function 1
+   // Function 2
+   // Function 3
+
+   return(INIT_SUCCEEDED);
+}
+
+//--- Expert deinitialization function
+void OnDeinit(const int reason)
+{
+   //--- Clean up resources and perform necessary actions
+}
+
+//--- Expert start function
+void OnTick()
+{
+   //--- Perform trading operations
+   //--- Update trailing stops
+   //--- Update pending orders
+   //--- Close positions if necessary
+}
+
+//--- Expert stop function
+void OnStop()
+{
+   //--- Perform necessary clean up actions
+}
+
